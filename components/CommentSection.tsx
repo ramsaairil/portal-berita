@@ -4,6 +4,7 @@ import { useState, useTransition, useMemo } from "react";
 import { addComment, toggleCommentLike } from "@/app/actions/interact";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ThumbsUp } from "lucide-react";
 import Image from "next/image";
 
 type CommentType = {
@@ -18,6 +19,12 @@ type CommentType = {
   };
   commentLikes: { userId: string }[];
   replies?: CommentType[];
+};
+
+type FlatRepliedComment = Omit<CommentType, 'replies'> & {
+  replyToName?: string;
+  isDirectReplyToRoot?: boolean;
+  replies?: FlatRepliedComment[];
 };
 
 export default function CommentSection({
@@ -37,7 +44,7 @@ export default function CommentSection({
   const [content, setContent] = useState("");
   const router = useRouter();
 
-  // Reconstruct infinite tree from flat SQL array
+  // Reconstruct 1-level deep tree from flat SQL array
   const topLevelComments = useMemo(() => {
     const map = new Map<string, CommentType>();
     
@@ -55,15 +62,41 @@ export default function CommentSection({
       }
     });
 
-    // Sort replies ascending
-    map.forEach(c => {
-       if (c.replies) c.replies.sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    });
-    
-    // Sort roots descending
-    roots.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Helper to flatten a tree node into a flat array of all its descendants
+    const flattenDescendants = (node: CommentType, rootId: string): FlatRepliedComment[] => {
+      let flat: FlatRepliedComment[] = [];
+      if (!node.replies) return flat;
+      
+      // Sort immediate children chronologically
+      node.replies.sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      
+      for (const child of node.replies) {
+         flat.push({
+           ...child,
+           replyToName: node.author.name || "Seseorang",
+           isDirectReplyToRoot: node.id === rootId
+         });
+         
+         flat = flat.concat(flattenDescendants(child, rootId));
+      }
+      return flat;
+    };
 
-    return roots;
+    const finalRoots = roots.map(root => {
+       const flatReplies = flattenDescendants(root, root.id);
+       // Sort all descendants chronologically across the entire thread
+       flatReplies.sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+       
+       return {
+         ...root,
+         replies: flatReplies
+       } as FlatRepliedComment;
+    });
+
+    // Sort roots descending (newest root first)
+    finalRoots.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return finalRoots;
   }, [comments]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -81,8 +114,8 @@ export default function CommentSection({
     });
   };
 
-  // Recursive component to render a comment and its replies
-  const SingleComment = ({ c, isReply = false }: { c: CommentType, isReply?: boolean }) => {
+  // 1-Level Indentation Component
+  const SingleComment = ({ c, isRoot = true }: { c: FlatRepliedComment, isRoot?: boolean }) => {
     const [isReplying, setIsReplying] = useState(false);
     const [replyContent, setReplyContent] = useState("");
     const [isActionPending, startAction] = useTransition();
@@ -92,6 +125,11 @@ export default function CommentSection({
     const initialLikeCount = c.commentLikes.length;
     const [isLiked, setIsLiked] = useState(initialIsLiked);
     const [likeCount, setLikeCount] = useState(initialLikeCount);
+
+    // Paginasi Balasan
+    const [visibleRepliesCount, setVisibleRepliesCount] = useState(2);
+    const visibleReplies = c.replies ? c.replies.slice(0, visibleRepliesCount) : [];
+    const hasMoreReplies = c.replies && c.replies.length > visibleRepliesCount;
 
     const handleReplySubmit = (e: React.FormEvent) => {
       e.preventDefault();
@@ -104,6 +142,8 @@ export default function CommentSection({
          } else {
            setIsReplying(false);
            setReplyContent("");
+           // Otomatis buka semua balasan ketika kita baru saja membalas
+           if (c.replies) setVisibleRepliesCount(c.replies.length + 1);
          }
       });
     };
@@ -127,15 +167,22 @@ export default function CommentSection({
     };
 
     return (
-      <div className={`flex gap-4 ${isReply ? "mt-6" : ""}`}>
+      <div className={`flex gap-3 sm:gap-4`}>
         <img 
           src={c.author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.author.name}`} 
           alt={c.author.name || "User"} 
           className="w-10 h-10 object-cover rounded-full shrink-0 border border-gray-100" 
         />
         <div className="flex-1">
-           <div className="flex items-center gap-2 mb-1">
+           <div className="flex items-center gap-2 mb-1 flex-wrap">
              <h4 className="font-bold text-[15px]">{c.author.name}</h4>
+             
+             {!isRoot && !c.isDirectReplyToRoot && c.replyToName && (
+               <span className="text-gray-500 text-[13px] flex items-center gap-1 font-medium bg-gray-50 px-2 py-0.5 rounded-md">
+                 ▶ {c.replyToName}
+               </span>
+             )}
+
              <span className="text-gray-400 text-[13px]">
                {new Date(c.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short" })} 
                {" · "} 
@@ -148,9 +195,9 @@ export default function CommentSection({
               <button 
                 onClick={handleLike} 
                 disabled={isActionPending} 
-                className={`hover:text-black flex items-center gap-1 transition-colors ${isLiked ? 'text-black' : ''}`}
+                className={`hover:text-black flex items-center gap-1.5 transition-colors ${isLiked ? 'text-black' : ''}`}
               >
-                 <span>👍</span> {likeCount > 0 ? likeCount : ''}
+                 <ThumbsUp className={`w-4 h-4 ${isLiked ? 'fill-black' : ''}`} /> {likeCount > 0 ? likeCount : ''}
               </button>
               
               <button onClick={() => {
@@ -182,12 +229,26 @@ export default function CommentSection({
              </form>
            )}
 
-           {/* Render Replies array if any exist recursively */}
-           {c.replies && c.replies.length > 0 && (
-             <div className="border-l-2 border-gray-100 pl-4 sm:pl-6 mt-4 space-y-6">
-                {c.replies.map(reply => (
-                   <SingleComment key={reply.id} c={reply} isReply={true} />
+           {/* Render flat Replies array only if this is Root */}
+           {isRoot && c.replies && c.replies.length > 0 && (
+             <div className="mt-4 space-y-6">
+                {visibleReplies.map(reply => (
+                   <div key={reply.id} className="pt-2 sm:pl-2">
+                     <SingleComment c={reply} isRoot={false} />
+                   </div>
                 ))}
+
+                {hasMoreReplies && (
+                  <div className="pt-2 sm:pl-2">
+                    <button 
+                      onClick={() => setVisibleRepliesCount(prev => prev + 5)}
+                      className="text-[13px] font-bold text-gray-500 hover:text-black flex items-center gap-3 transition-colors text-left"
+                    >
+                      <span className="w-8 h-[1px] bg-gray-300"></span> 
+                      Lihat {c.replies!.length - visibleRepliesCount} balasan lainnya
+                    </button>
+                  </div>
+                )}
              </div>
            )}
         </div>

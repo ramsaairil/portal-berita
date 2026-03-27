@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import { getSession } from "@/lib/session";
 import prisma from "@/lib/prisma";
 
+import Footer from "@/components/Footer";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,18 +29,19 @@ export default async function RootLayout({
 }) {
   const session = await getSession();
   let dbUser = null;
-  
+
   if (session) {
     dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
   }
 
   return (
     <html lang="id">
-      <body className="antialiased min-h-screen flex flex-col">
+      <body className="antialiased min-h-screen flex flex-col relative overflow-x-hidden">
         <Navbar user={dbUser} />
-        <div className="flex-1">
+        <div className="flex-1 basis-auto">
           {children}
         </div>
+        <Footer />
       </body>
     </html>
   );

@@ -67,8 +67,8 @@ export default async function ArticlePage({
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12 flex gap-12">
         {/* Main Content Area: Left Block */}
         <div className="w-full lg:w-[65%]">
-          <article>
-            <h1 className="text-[40px] font-bold leading-[48px] tracking-tight mb-8">
+          <article className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm">
+            <h1 className="text-[32px] sm:text-[40px] font-bold leading-[1.2] tracking-tight mb-8">
               {article.title}
             </h1>
 
@@ -141,22 +141,26 @@ export default async function ArticlePage({
         </div>
 
         {/* Right Block: Rekomendasi Berita & Kategori */}
-        <div className="hidden lg:block lg:w-[35%] border-l border-gray-100 pl-10">
-          <div className="sticky top-24">
+        <div className="hidden lg:block lg:w-[35%] pl-8">
+          <div className="sticky top-24 flex flex-col gap-6">
             {/* Related Articles Box */}
-            <div className="mb-12">
-              <h3 className="font-bold text-[16px] mb-6 border-b border-gray-100 pb-2">Rekomendasi Berita</h3>
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+              <h3 className="font-bold text-[16px] mb-6">Rekomendasi Berita</h3>
               {relatedArticles.length > 0 ? (
                 <div className="flex flex-col gap-6">
                   {relatedArticles.map(rel => (
-                    <Link href={`/berita/${rel.slug}`} key={rel.id} className="group">
-                      <div className="flex gap-4 items-start">
+                    <Link href={`/berita/${rel.slug}`} key={rel.id} className="group block">
+                      <div className="flex gap-4 items-center">
                         {rel.featuredImg && (
-                          <Image src={rel.featuredImg} width={80} height={80} alt={rel.title} className="w-20 h-20 object-cover shrink-0 rounded" />
+                          <div className="shrink-0 w-[80px] h-[80px] relative rounded-xl overflow-hidden">
+                            <Image src={rel.featuredImg} fill sizes="80px" alt={rel.title} className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                          </div>
                         )}
-                        <div>
-                          <h4 className="font-bold text-[15px] leading-snug group-hover:underline line-clamp-2 mb-1 text-black">{rel.title}</h4>
-                          <span className="text-[13px] text-gray-500 line-clamp-2">{rel.excerpt}</span>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-[14px] leading-snug group-hover:text-[#0d88b5] transition-colors duration-200 line-clamp-3 text-[#1a1a1a]">{rel.title}</h4>
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-400 mt-2 font-medium">
+                             <span>{rel.publishedAt ? new Date(rel.publishedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "Baru saja"}</span>
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -168,11 +172,11 @@ export default async function ArticlePage({
             </div>
 
             {/* Sidebar Kategori Inline */}
-            <div className="mt-10 border-t border-gray-100 pt-8">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
               <h2 className="text-[16px] font-bold mb-6">Kategori Populer</h2>
               <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
-                  <Link key={cat.id} href={`/category/${cat.slug}`} className="bg-gray-100 hover:bg-gray-200 transition-colors text-black px-4 py-2 rounded-full text-[14px]">
+                  <Link key={cat.id} href={`/category/${cat.slug}`} className="bg-gray-50 hover:bg-gray-100 transition-colors text-black px-4 py-2 rounded-full text-[14px] border border-gray-100">
                     {cat.name}
                   </Link>
                 ))}

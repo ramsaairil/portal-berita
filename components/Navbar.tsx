@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { logoutAction } from "@/app/actions/auth";
 import { usePathname } from "next/navigation";
+import SearchBar from "@/components/SearchBar";
 
 export default function Navbar({ user }: { user?: any }) {
   const pathname = usePathname();
@@ -21,14 +22,7 @@ export default function Navbar({ user }: { user?: any }) {
             Berita.
           </span>
         </Link>
-        <div className="hidden md:flex flex-1 items-center bg-[#f9f9f9] rounded-full px-4 py-2.5 ml-4 w-full max-w-xs hover:bg-gray-100 transition-colors">
-          <Search className="w-5 h-5 text-gray-400 shrink-0" strokeWidth={1.5} />
-          <input
-            type="text"
-            placeholder="Search"
-            className="bg-transparent border-none outline-none text-[15px] ml-3 w-full text-black placeholder-gray-500"
-          />
-        </div>
+        <SearchBar />
       </div>
 
       {/* Right Section */}

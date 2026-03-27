@@ -18,57 +18,54 @@ export default function ArticleList({ articles }: { articles: ArticleWithRelatio
   return (
     <>
       {articles.map((article) => (
-        <article key={article.id} className="flex gap-6 group">
-          <div className="flex-1">
+        <article key={article.id} className="flex flex-col sm:flex-row gap-5 group border border-gray-100 rounded-2xl p-4 bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-gray-200 hover:-translate-y-1 transition-all duration-300">
+          {article.featuredImg && (
+            <Link href={`/berita/${article.slug}`} className="shrink-0 w-full sm:w-[220px] aspect-[4/3] sm:h-[140px] relative rounded-xl overflow-hidden block">
+              <Image
+                src={article.featuredImg}
+                fill
+                sizes="(max-width: 768px) 100vw, 220px"
+                alt={article.title}
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </Link>
+          )}
+          <div className="flex-1 flex flex-col py-1">
             <div className="flex items-center gap-2 mb-2">
               <img
                 src={article.author.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${article.author.name}`}
                 alt={article.author.name || "Author"}
-                className="rounded-full w-6 h-6 object-cover border border-gray-100"
+                className="rounded-full w-5 h-5 object-cover border border-gray-100"
               />
-              <span className="text-[14px] font-medium">
-                {article.author.name}
-              </span>
-              <span className="text-gray-500 text-[14px]">in</span>
-              <span className="text-[14px] font-medium">{article.category.name}</span>
+              <span className="text-[13px] font-medium">{article.author.name}</span>
+              <span className="text-gray-400 text-[13px]">·</span>
+              <span className="text-[13px] font-medium text-gray-500">{article.category.name}</span>
             </div>
-            <Link href={`/berita/${article.slug}`}>
-              <h2 className="text-[22px] font-bold leading-7 mb-2 group-hover:underline decoration-1 underline-offset-[3px]">
+            
+            <Link href={`/berita/${article.slug}`} className="block mb-2">
+              <h2 className="text-[18px] sm:text-[20px] font-bold leading-snug group-hover:text-[#0d88b5] transition-colors duration-200 text-[#1a1a1a]">
                 {article.title}
               </h2>
-              <p className="text-[16px] text-[#242424] leading-6 mb-4 line-clamp-2">
-                {article.excerpt}
-              </p>
             </Link>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-[13px] text-gray-500">
-                <span>
-                  {article.publishedAt
-                    ? new Date(article.publishedAt).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric"
-                      })
-                    : "Draft"}
-                </span>
-                <span>·</span>
-                <span>3 min read</span>
-                <span>·</span>
-                <span className="bg-gray-100 rounded-full px-2 py-0.5 mt-0.5">{article.category.name}</span>
-              </div>
+
+            <p className="text-[14px] text-gray-600 leading-relaxed mb-4 line-clamp-2">
+              {article.excerpt}
+            </p>
+
+            <div className="mt-auto flex items-center gap-2 text-[12px] text-gray-500 font-medium">
+              <span>
+                {article.publishedAt
+                  ? new Date(article.publishedAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric"
+                    })
+                  : "Draft"}
+              </span>
+              <span>·</span>
+              <span>3 min read</span>
             </div>
           </div>
-          {article.featuredImg && (
-            <Link href={`/berita/${article.slug}`} className="hidden sm:block shrink-0">
-              <Image
-                src={article.featuredImg}
-                width={180}
-                height={120}
-                alt={article.title}
-                className="object-cover w-[180px] h-[120px]"
-              />
-            </Link>
-          )}
         </article>
       ))}
     </>
