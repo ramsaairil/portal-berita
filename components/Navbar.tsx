@@ -55,6 +55,12 @@ export default function Navbar({ user, categories }: { user?: any, categories?: 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    setIsSidebarOpen(false);
+    setIsProfileOpen(false);
+    setIsMobileSearchOpen(false);
+  }, [pathname]);
+
   if (pathname === "/login" || pathname === "/register") return null;
 
   const isAdmin = user?.role === "ADMIN";
