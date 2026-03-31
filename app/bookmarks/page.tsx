@@ -26,7 +26,7 @@ export default async function BookmarksPage() {
   const articles = bookmarks.map(b => b.article);
 
   return (
-    <div className="bg-[#ebf5fa] min-h-screen font-sans">
+    <div className="bg-white min-h-screen font-sans">
       <main className="max-w-5xl mx-auto px-6 py-12">
         <header className="mb-10">
           <h1 className="text-[32px] sm:text-[40px] font-bold tracking-tight text-[#1a1a1a]">

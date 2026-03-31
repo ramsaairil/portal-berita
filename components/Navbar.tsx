@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Search, PenSquare, LogOut, User, Bookmark, X, Newspaper } from "lucide-react";
+import { Menu, Search, PenSquare, LogOut, User, Bookmark, X, Newspaper, Home } from "lucide-react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { usePathname } from "next/navigation";
@@ -181,7 +181,8 @@ export default function Navbar({ user, categories }: { user?: any, categories?: 
         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-6">
           {/* Section 1: Navigation/User */}
           <div className="flex flex-col gap-1">
-            <Link href="/" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl hover:bg-gray-50 text-gray-700 font-bold text-[15px] transition-colors">
+            <Link href="/" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl hover:bg-[#ebf5fa] hover:text-[#0d88b5] text-gray-700 font-semibold text-[15px] transition-colors group">
+              <Home className="w-5 h-5 text-gray-400 group-hover:text-[#0d88b5]" strokeWidth={2} />
               Beranda
             </Link>
             {user ? (
