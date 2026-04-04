@@ -33,8 +33,9 @@ export default function HeroSlider({ articles }: { articles: any[] }) {
   if (!articles || articles.length === 0) return null;
 
   return (
-    <div className="mb-10 pb-10 border-b-2 border-black relative group">
-      <div className="grid">
+    <div className="mb-10 pb-10 border-b-2 border-black group">
+      <div className="relative mb-5">
+        <div className="grid">
         {articles.map((article, idx) => {
           const categoryColor = getCategoryColor(article.category.name);
           const isActive = idx === currentIndex;
@@ -45,7 +46,7 @@ export default function HeroSlider({ articles }: { articles: any[] }) {
               className={`col-start-1 row-start-1 transition-opacity duration-700 ease-in-out ${isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                 }`}
             >
-              <Link href={`/berita/${article.slug}`} className="block relative aspect-[4/3] sm:aspect-[16/9] w-full mb-5 overflow-hidden group/slide rounded-lg shadow-sm">
+              <Link href={`/berita/${article.slug}`} className="block relative aspect-[4/3] sm:aspect-[16/9] w-full overflow-hidden group/slide rounded-lg shadow-sm">
                 {/* Featured Image */}
                 {article.featuredImg ? (
                   <Image
@@ -106,37 +107,38 @@ export default function HeroSlider({ articles }: { articles: any[] }) {
             </div>
           );
         })}
-      </div>
-
-      {/* Navigation Buttons */}
-      {articles.length > 1 && (
-        <div className="absolute top-[30%] -translate-y-1/2 left-0 right-0 flex justify-between px-2 sm:px-4 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              prevSlide();
-            }}
-            className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-black pointer-events-auto hover:bg-white transition-colors shadow-lg"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              nextSlide();
-            }}
-            className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-black pointer-events-auto hover:bg-white transition-colors shadow-lg"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
         </div>
-      )}
+
+        {/* Navigation Buttons */}
+        {articles.length > 1 && (
+          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 sm:px-6 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                prevSlide();
+              }}
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-black pointer-events-auto hover:bg-white transition-colors shadow-lg"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                nextSlide();
+              }}
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-black pointer-events-auto hover:bg-white transition-colors shadow-lg"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Slide Indicators */}
       {articles.length > 1 && (
-        <div className="flex items-center gap-2 mt-6">
+        <div className="flex items-center justify-center gap-2 mt-6">
           {articles.map((_, idx) => (
             <button
               key={idx}
