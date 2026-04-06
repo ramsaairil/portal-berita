@@ -60,7 +60,7 @@ export default async function Home(props: {
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar — Desktop Only */}
         <Sidebar categories={categories} />
       </main>
     </div>

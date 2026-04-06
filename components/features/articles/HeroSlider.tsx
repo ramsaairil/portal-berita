@@ -33,7 +33,7 @@ export default function HeroSlider({ articles }: { articles: any[] }) {
   if (!articles || articles.length === 0) return null;
 
   return (
-    <div className="mb-10 pb-10 border-b-2 border-black group">
+    <div className="mb-6 group">
       <div className="relative mb-5">
         <div className="grid">
         {articles.map((article, idx) => {

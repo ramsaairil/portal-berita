@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Search, PenSquare, LogOut, User, Bookmark, X, Newspaper, Home } from "lucide-react";
+import { Menu, Search, PenSquare, LogOut, User, Bookmark, X, Newspaper, Home, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { usePathname } from "next/navigation";
@@ -200,6 +200,12 @@ export default function Navbar({ user, categories }: { user?: any, categories?: 
               <Home className="w-5 h-5 text-gray-400 group-hover:text-[#0d88b5]" strokeWidth={2} />
               Beranda
             </Link>
+            {isMobile && (
+              <Link href="/trending" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl hover:bg-[#fff3f0] hover:text-[#e62000] text-gray-700 font-semibold text-[15px] transition-colors group">
+                <TrendingUp className="w-5 h-5 text-gray-400 group-hover:text-[#e62000]" strokeWidth={2} />
+                Trending
+              </Link>
+            )}
             {user ? (
               <>
                 <Link href="/profile" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl hover:bg-[#ebf5fa] hover:text-[#0d88b5] text-gray-700 font-semibold text-[15px] transition-colors group">

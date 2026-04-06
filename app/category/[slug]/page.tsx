@@ -33,7 +33,7 @@ export default async function CategoryPage({
         {/* Main Content Area */}
         <div className="w-full lg:w-[65%]">
           {/* Category Header — Vox-style */}
-          <header className="mb-10 pb-6 border-b-2 border-black">
+          <header className="mb-6">
             <p
               className="text-[11px] font-black uppercase tracking-[0.2em] mb-3"
               style={{ color: categoryColor }}

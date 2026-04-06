@@ -6,7 +6,7 @@ export default function HeroArticle({ article }: { article: any }) {
   const categoryColor = getCategoryColor(article.category.name);
 
   return (
-    <div className="mb-10 pb-10 border-b-2 border-black">
+    <div className="mb-6">
       <Link href={`/berita/${article.slug}`} className="group block">
         {/* Featured Image */}
         {article.featuredImg && (
