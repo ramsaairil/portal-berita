@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
 import { getCategoryColor } from "@/lib/categoryColors";
 import { usePathname } from "next/navigation";
 
-type Category = Prisma.CategoryGetPayload<{}>;
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export default function CategoryBar({ categories }: { categories: Category[] }) {
   const pathname = usePathname();

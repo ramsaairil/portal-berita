@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 
@@ -10,18 +10,17 @@ export async function toggleLike(articleId: string) {
 
   const userId = session.user.id;
 
-  const existingLike = await prisma.like.findUnique({
-    where: {
-      userId_articleId: { userId, articleId }
-    }
-  });
+  const { data: existingLike } = await supabase
+    .from("Like")
+    .select("id")
+    .eq("userId", userId)
+    .eq("articleId", articleId)
+    .maybeSingle();
 
   if (existingLike) {
-    await prisma.like.delete({ where: { id: existingLike.id } });
+    await supabase.from("Like").delete().eq("id", existingLike.id);
   } else {
-    await prisma.like.create({
-      data: { userId, articleId }
-    });
+    await supabase.from("Like").insert({ userId, articleId });
   }
 
   revalidatePath(`/berita/[slug]`, "page");
@@ -34,31 +33,37 @@ export async function addComment(articleId: string, content: string, parentId?: 
   
   if (!content.trim()) return { error: "Komentar tidak boleh kosong." };
 
-  const comment = await prisma.comment.create({
-    data: {
+  const { data: comment, error: createError } = await supabase
+    .from("Comment")
+    .insert({
       content,
       articleId,
       authorId: session.user.id,
       parentId: parentId || null
-    }
-  });
+    })
+    .select()
+    .single();
+
+  if (createError || !comment) {
+    console.error("Comment Error:", createError);
+    return { error: "Gagal mengirim komentar." };
+  }
 
   // Trigger Notification for Reply
   if (parentId) {
-    const parentComment = await prisma.comment.findUnique({
-      where: { id: parentId },
-      select: { authorId: true }
-    });
+    const { data: parentComment } = await supabase
+      .from("Comment")
+      .select("authorId")
+      .eq("id", parentId)
+      .single();
 
     if (parentComment && parentComment.authorId !== session.user.id) {
-      await (prisma as any).notification.create({
-        data: {
-          type: "REPLY_COMMENT",
-          userId: parentComment.authorId,
-          actorId: session.user.id,
-          articleId: articleId,
-          commentId: comment.id
-        }
+      await supabase.from("Notification").insert({
+        type: "REPLY_COMMENT",
+        userId: parentComment.authorId,
+        actorId: session.user.id,
+        articleId: articleId,
+        commentId: comment.id
       });
     }
   }
@@ -73,37 +78,43 @@ export async function toggleCommentLike(commentId: string) {
 
   const userId = session.user.id;
 
-  const existingLike = await prisma.commentLike.findUnique({
-    where: {
-      userId_commentId: { userId, commentId }
-    }
-  });
+  const { data: existingLike } = await supabase
+    .from("CommentLike")
+    .select("id")
+    .eq("userId", userId)
+    .eq("commentId", commentId)
+    .maybeSingle();
 
   if (existingLike) {
-    await prisma.commentLike.delete({ where: { id: existingLike.id } });
+    await supabase.from("CommentLike").delete().eq("id", existingLike.id);
   } else {
-    const like = await prisma.commentLike.create({
-      data: { userId, commentId },
-      include: {
-        comment: {
-          select: {
-            authorId: true,
-            articleId: true
-          }
-        }
-      }
-    });
+    const { data: like, error } = await supabase
+      .from("CommentLike")
+      .insert({ userId, commentId })
+      .select(`
+        *,
+        Comment (
+          authorId,
+          articleId
+        )
+      `)
+      .single();
+
+    if (error || !like) {
+       console.error("Comment Like Error:", error);
+       return { error: "Gagal menyukai komentar." };
+    }
+
+    const comment: any = like.Comment;
 
     // Trigger Notification for Like
-    if (like.comment.authorId !== userId) {
-      await (prisma as any).notification.create({
-        data: {
-          type: "LIKE_COMMENT",
-          userId: like.comment.authorId,
-          actorId: userId,
-          articleId: like.comment.articleId,
-          commentId: commentId
-        }
+    if (comment.authorId !== userId) {
+      await supabase.from("Notification").insert({
+        type: "LIKE_COMMENT",
+        userId: comment.authorId,
+        actorId: userId,
+        articleId: comment.articleId,
+        commentId: commentId
       });
     }
   }
@@ -118,18 +129,17 @@ export async function toggleBookmark(articleId: string) {
 
   const userId = session.user.id;
 
-  const existingBookmark = await prisma.bookmark.findUnique({
-    where: {
-      userId_articleId: { userId, articleId }
-    }
-  });
+  const { data: existingBookmark } = await supabase
+    .from("Bookmark")
+    .select("id")
+    .eq("userId", userId)
+    .eq("articleId", articleId)
+    .maybeSingle();
 
   if (existingBookmark) {
-    await prisma.bookmark.delete({ where: { id: existingBookmark.id } });
+    await supabase.from("Bookmark").delete().eq("id", existingBookmark.id);
   } else {
-    await prisma.bookmark.create({
-      data: { userId, articleId }
-    });
+    await supabase.from("Bookmark").insert({ userId, articleId });
   }
 
   revalidatePath("/bookmarks");
@@ -140,10 +150,11 @@ export async function deleteComment(commentId: string) {
   const session = await getSession();
   if (!session) return { error: "Silakan login untuk menghapus komentar." };
 
-  const comment = await prisma.comment.findUnique({
-    where: { id: commentId },
-    select: { authorId: true, articleId: true }
-  });
+  const { data: comment } = await supabase
+    .from("Comment")
+    .select("authorId, articleId")
+    .eq("id", commentId)
+    .maybeSingle();
 
   if (!comment) return { error: "Komentar tidak ditemukan." };
 
@@ -154,9 +165,7 @@ export async function deleteComment(commentId: string) {
     return { error: "Anda tidak memiliki izin untuk menghapus komentar ini." };
   }
 
-  await prisma.comment.delete({
-    where: { id: commentId }
-  });
+  await supabase.from("Comment").delete().eq("id", commentId);
 
   revalidatePath(`/berita/[slug]`, "page");
   return { success: true };

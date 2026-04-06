@@ -1,14 +1,25 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
 import { getCategoryColor } from "@/lib/categoryColors";
 
-type ArticleWithRelations = Prisma.ArticleGetPayload<{
-  include: {
-    author: true;
-    category: true;
+interface ArticleWithRelations {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  featuredImg?: string | null;
+  publishedAt?: string | Date | null;
+  author: {
+    id: string;
+    name: string | null;
+    image?: string | null;
   };
-}>;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
 
 function ArticleCard({ article }: { article: ArticleWithRelations }) {
   const categoryColor = getCategoryColor(article.category.name);

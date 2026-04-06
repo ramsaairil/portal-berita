@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import ArticleList from "@/components/features/articles/ArticleList";
 import Sidebar from "@/components/layout/Sidebar";
 import { notFound } from "next/navigation";
@@ -12,17 +12,32 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
 
-  const category = await prisma.category.findUnique({
-    where: { slug },
-  });
+  const { data: category, error: categoryError } = await supabase
+    .from("Category")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
 
-  if (!category) notFound();
+  if (categoryError || !category) notFound();
 
-  const articles = await prisma.article.findMany({
-    where: { categoryId: category.id },
-    include: { author: true, category: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const { data: articles, error: articlesError } = await supabase
+    .from("Article")
+    .select(`
+      *,
+      author:User (
+        id,
+        name,
+        image
+      ),
+      category:Category (
+        id,
+        name,
+        slug
+      )
+    `)
+    .eq("categoryId", category.id)
+    .eq("status", "PUBLISHED")
+    .order("createdAt", { ascending: false });
 
   const categories = await getPopularCategories();
   const categoryColor = getCategoryColor(category.name);
@@ -49,12 +64,12 @@ export default async function CategoryPage({
               </p>
             )}
             <p className="text-[13px] text-gray-400 mt-2 font-semibold">
-              {articles.length} artikel
+              {articles?.length || 0} artikel
             </p>
           </header>
 
           {/* Article List */}
-          <ArticleList articles={articles as any} />
+          <ArticleList articles={(articles || []) as any} />
         </div>
 
         {/* Sidebar */}

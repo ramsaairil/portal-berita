@@ -1,9 +1,12 @@
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
 import TrendingWidget from "@/components/features/articles/TrendingWidget";
 import { getCategoryColor } from "@/lib/categoryColors";
 
-type Category = Prisma.CategoryGetPayload<{}>;
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export default function Sidebar({ categories }: { categories: Category[] }) {
   return (

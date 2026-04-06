@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import ArticleInteraction from "@/components/features/articles/ArticleInteraction";
 import CommentSection from "@/components/features/articles/CommentSection";
@@ -17,29 +17,41 @@ export default async function ArticlePage({
 }) {
   const { slug } = await params;
 
-  const article = await prisma.article.findUnique({
-    where: { slug: slug },
-    include: {
-      author: true,
-      category: true,
-      tags: true,
-      likes: true,
-      bookmarks: true,
-      _count: { select: { comments: true } },
-      comments: {
-        include: { author: true, commentLikes: true },
-        orderBy: { createdAt: "asc" }
-      }
-    },
-  });
+  const { data: article, error } = await supabase
+    .from("Article")
+    .select(`
+      *,
+      author:User (
+        id,
+        name,
+        image
+      ),
+      category:Category (
+        id,
+        name,
+        slug
+      ),
+      tags:Tag (*),
+      likes:Like (userId),
+      bookmarks:Bookmark (userId),
+      comments:Comment (
+        *,
+        author:User (
+          id,
+          name,
+          image
+        ),
+        commentLikes:CommentLike (*)
+      )
+    `)
+    .eq("slug", slug)
+    .maybeSingle();
 
-  if (!article) notFound();
+  if (error || !article) notFound();
 
   const session = await getSession();
   const isLoggedIn = !!session;
 
-  // PERBAIKAN: Menambahkan tipe data eksplisit (like: { userId: string }) 
-  // agar TypeScript tidak memberikan error "implicitly has an any type"
   const isLikedByMe = session?.user?.id
     ? article.likes.some((like: { userId: string }) => like.userId === session.user.id)
     : false;
@@ -48,15 +60,33 @@ export default async function ArticlePage({
     ? article.bookmarks.some((b: { userId: string }) => b.userId === session.user.id)
     : false;
 
-  const relatedArticles = await prisma.article.findMany({
-    where: { id: { not: article.id } },
-    take: 3,
-    include: { author: true, category: true },
-    orderBy: { createdAt: "desc" }
-  });
+  const { data: relatedArticles } = await supabase
+    .from("Article")
+    .select(`
+      *,
+      author:User (
+        id,
+        name,
+        image
+      ),
+      category:Category (
+        id,
+        name,
+        slug
+      )
+    `)
+    .neq("id", article.id)
+    .eq("status", "PUBLISHED")
+    .order("createdAt", { ascending: false })
+    .limit(3);
 
   const categories = await getPopularCategories();
   const categoryColor = getCategoryColor(article.category.name);
+
+  // Re-sort comments by createdAt asc (Supabase may not guarantee order in nested select)
+  const sortedComments = [...(article.comments || [])].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
 
   return (
     <div className="bg-white font-sans min-h-screen">
@@ -119,10 +149,10 @@ export default async function ArticlePage({
             <div className="mb-12">
               <ArticleInteraction
                 articleId={article.id}
-                initialLikes={article.likes.length}
+                initialLikes={article.likes?.length || 0}
                 initialIsLiked={isLikedByMe}
                 initialIsBookmarked={isBookmarkedByMe}
-                commentCount={article._count.comments}
+                commentCount={article.comments?.length || 0}
               />
             </div>
 
@@ -137,10 +167,10 @@ export default async function ArticlePage({
             </div>
 
             {/* Minimal Tags */}
-            {article.tags.length > 0 && (
+            {article.tags?.length > 0 && (
               <div className="flex items-center gap-2.5 flex-wrap border-t border-gray-100 dark:border-zinc-800 pt-10 mb-14">
                 <span className="text-gray-400 dark:text-gray-500 font-bold mr-2 text-[12px] uppercase tracking-widest">TAGS:</span>
-                {article.tags.map(tag => (
+                {article.tags.map((tag: any) => (
                   <Link key={tag.id} href={`/`} className="bg-gray-50 hover:bg-gray-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300 px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors ring-1 ring-gray-200 dark:ring-zinc-800">
                     {tag.name}
                   </Link>
@@ -152,15 +182,15 @@ export default async function ArticlePage({
             <div className="pt-2 mb-12">
               <CommentSection
                 articleId={article.id}
-                comments={article.comments as any}
-                totalCommentCount={article._count.comments}
+                comments={sortedComments as any}
+                totalCommentCount={article.comments?.length || 0}
                 isLoggedIn={isLoggedIn}
                 currentUserId={session?.user?.id}
               />
             </div>
 
             {/* Berita Terkait Section */}
-            {relatedArticles.length > 0 && (
+            {relatedArticles && relatedArticles.length > 0 && (
               <div className="border-t border-gray-200 dark:border-zinc-800 pt-16 mt-16 mb-14">
                 <div className="max-w-[720px] mx-auto">
                   <div className="flex items-center justify-between mb-8">
@@ -188,4 +218,4 @@ export default async function ArticlePage({
       </main>
     </div>
   );
-}
+}

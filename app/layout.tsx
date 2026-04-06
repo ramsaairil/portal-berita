@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import { getSession } from "@/lib/session";
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import Footer from "@/components/layout/Footer";
 import CategoryBar from "@/components/layout/CategoryBar";
 import { getPopularCategories } from "@/lib/categories";
@@ -32,7 +32,12 @@ export default async function RootLayout({
   let dbUser = null;
 
   if (session?.user?.id) {
-    dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
+    const { data } = await supabase
+      .from("User")
+      .select("*")
+      .eq("id", session.user.id)
+      .maybeSingle();
+    dbUser = data;
   }
 
   const categories = await getPopularCategories();

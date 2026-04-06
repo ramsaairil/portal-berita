@@ -1,21 +1,36 @@
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 
 export async function getPopularCategories() {
-  const categories = await prisma.category.findMany({
-    include: {
-      articles: {
-        select: {
-          _count: {
-            select: { likes: true, comments: true }
-          }
-        }
-      }
-    }
-  });
+  const { data: categories, error } = await supabase
+    .from("Category")
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      createdAt,
+      updatedAt,
+      Article (
+        id,
+        Like (count),
+        Comment (count)
+      )
+    `);
 
-  const withEngagement = categories.map(cat => {
-    const totalEngagement = cat.articles.reduce((acc, article) => {
-      return acc + article._count.likes + article._count.comments;
+  if (error || !categories) {
+    console.error("Error fetching popular categories:", error);
+    return [];
+  }
+
+  const withEngagement = categories.map((cat: any) => {
+    // Note: cat.Article is an array of articles
+    // Each article has Like and Comment as an array with a { count } object if using count query correctly
+    // or just an array if using standard join. In Supabase JS, Like: [{ count: 0 }] or Similar.
+    
+    const totalEngagement = cat.Article.reduce((acc: number, article: any) => {
+      const likesCount = article.Like[0]?.count || 0;
+      const commentsCount = article.Comment[0]?.count || 0;
+      return acc + likesCount + commentsCount;
     }, 0);
     
     return {
@@ -29,5 +44,5 @@ export async function getPopularCategories() {
     };
   });
 
-  return withEngagement.sort((a, b) => b.engagement - a.engagement).slice(0, 7);
+  return withEngagement.sort((a: any, b: any) => b.engagement - a.engagement).slice(0, 7);
 }

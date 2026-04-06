@@ -1,20 +1,22 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 export async function deleteArticle(articleId: string) {
   const session = await getSession();
   if (!session) return { error: "Silakan login terlebih dahulu." };
 
-  const article = await prisma.article.findUnique({
-    where: { id: articleId },
-    select: { authorId: true },
-  });
+  const { data: article, error: findError } = await supabase
+    .from("Article")
+    .select("authorId")
+    .eq("id", articleId)
+    .maybeSingle();
 
-  if (!article) return { error: "Artikel tidak ditemukan." };
+  if (findError || !article) {
+    return { error: "Artikel tidak ditemukan." };
+  }
 
   const isAuthor = article.authorId === session.user.id;
   const isAdmin = session.user.role === "ADMIN";
@@ -23,7 +25,15 @@ export async function deleteArticle(articleId: string) {
     return { error: "Anda tidak memiliki izin untuk menghapus artikel ini." };
   }
 
-  await prisma.article.delete({ where: { id: articleId } });
+  const { error: deleteError } = await supabase
+    .from("Article")
+    .delete()
+    .eq("id", articleId);
+
+  if (deleteError) {
+    console.error("Delete Error:", deleteError);
+    return { error: "Gagal menghapus artikel." };
+  }
 
   revalidatePath("/my-articles");
   revalidatePath("/");

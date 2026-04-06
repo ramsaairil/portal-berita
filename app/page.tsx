@@ -1,6 +1,6 @@
 import Sidebar from "@/components/layout/Sidebar";
 import Pagination from "@/components/ui/Pagination";
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { getPopularCategories } from "@/lib/categories";
 import HeroSlider from "@/components/features/articles/HeroSlider";
 import ArticleGrid from "@/components/features/articles/ArticleGrid";
@@ -12,17 +12,36 @@ export default async function Home(props: {
   const page =
     typeof searchParams?.page === "string" ? parseInt(searchParams.page) : 1;
   const limit = 9;
-  const skip = (page - 1) * limit;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-  const [articles, totalArticles] = await Promise.all([
-    prisma.article.findMany({
-      include: { author: true, category: true },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-      skip: skip,
-    }),
-    prisma.article.count(),
+  const [articlesRes, countRes] = await Promise.all([
+    supabase
+      .from("Article")
+      .select(`
+        *,
+        author:User (
+          id,
+          name,
+          image
+        ),
+        category:Category (
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq("status", "PUBLISHED")
+      .order("createdAt", { ascending: false })
+      .range(from, to),
+    supabase
+      .from("Article")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "PUBLISHED")
   ]);
+
+  const articles = articlesRes.data || [];
+  const totalArticles = countRes.count || 0;
 
   const totalPages = Math.ceil(totalArticles / limit);
   const categories = await getPopularCategories();

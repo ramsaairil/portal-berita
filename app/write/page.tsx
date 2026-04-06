@@ -1,17 +1,21 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import ArticleImageUpload from "@/components/features/articles/ArticleImageUpload";
 
 export default async function WritePage() {
-  const categories = await prisma.category.findMany();
+  const { data: categoriesRes } = await supabase.from("Category").select("*");
+  const categories = categoriesRes || [];
   
   // Karena belum ada login, kita ambil user ADMIN pertama secara otomatis sebagai penulis
-  const defaultUser = await prisma.user.findFirst({
-    where: { role: "ADMIN" }
-  });
+  const { data: defaultUser } = await supabase
+    .from("User")
+    .select("*")
+    .eq("role", "ADMIN")
+    .limit(1)
+    .maybeSingle();
 
   async function createArticle(formData: FormData) {
     "use server";
@@ -44,19 +48,22 @@ export default async function WritePage() {
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
 
-    await prisma.article.create({
-      data: {
-        title,
-        content,
-        excerpt,
-        featuredImg,
-        slug,
-        status: "PUBLISHED",
-        publishedAt: new Date(),
-        authorId: defaultUser.id,
-        categoryId: categoryId,
-      }
+    const { error } = await supabase.from("Article").insert({
+      title,
+      content,
+      excerpt,
+      featuredImg,
+      slug,
+      status: "PUBLISHED",
+      publishedAt: new Date().toISOString(),
+      authorId: defaultUser.id,
+      categoryId: categoryId,
     });
+
+    if (error) {
+      console.error("Create article error:", error);
+      throw new Error("Gagal menerbitkan berita.");
+    }
 
     revalidatePath("/");
     redirect("/");
@@ -88,7 +95,7 @@ export default async function WritePage() {
                 <div>
                   <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Kategori</label>
                   <select name="categoryId" required className="w-full bg-gray-50/50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-gray-900 dark:text-white p-3 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none cursor-pointer transition-all">
-                    {categories.map(c => (
+                    {categories.map((c: any) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>

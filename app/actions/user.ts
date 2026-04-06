@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
@@ -18,7 +18,7 @@ export async function updateProfile(formData: FormData) {
     return { error: "Nama tidak boleh kosong." };
   }
 
-  let imageUrl = undefined;
+  let imageUrl: string | undefined = undefined;
 
   // Process File Upload if it exists and is populated
   if (imageFile && imageFile.size > 0 && imageFile.name !== "undefined") {
@@ -46,13 +46,18 @@ export async function updateProfile(formData: FormData) {
      imageUrl = `/uploads/${filename}`;
   }
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
+  const { error } = await supabase
+    .from("User")
+    .update({
       name: name.trim(),
       ...(imageUrl !== undefined && { image: imageUrl })
-    }
-  });
+    })
+    .eq("id", session.user.id);
+
+  if (error) {
+    console.error("Profile update error:", error);
+    return { error: "Gagal memperbarui profil." };
+  }
 
   // Revalidate layout and currently active pages where avatar may appear
   revalidatePath("/", "layout");
