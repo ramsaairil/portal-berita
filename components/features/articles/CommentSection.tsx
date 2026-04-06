@@ -269,7 +269,7 @@ export default function CommentSection({
   };
 
   return (
-    <div id="comments" className="mt-16 border-t border-gray-100 pt-10">
+    <div id="comments" className="mt-8 pt-0">
       <h3 className="text-2xl font-bold mb-8">Komentar ({totalCommentCount})</h3>
 
       {isLoggedIn ? (
@@ -303,9 +303,7 @@ export default function CommentSection({
             <SingleComment key={c.id} c={c} />
           ))}
         </div>
-      ) : (
-        <p className="text-gray-500 text-center py-10 bg-gray-50 rounded-xl border border-gray-100">Jadilah yang pertama memberikan pendapat untuk artikel ini.</p>
-      )}
+      ) : null}
     </div>
   );
 }

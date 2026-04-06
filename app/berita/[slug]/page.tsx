@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import ArticleInteraction from "@/components/features/articles/ArticleInteraction";
 import CommentSection from "@/components/features/articles/CommentSection";
+import ArticleGrid from "@/components/features/articles/ArticleGrid";
 import { getPopularCategories } from "@/lib/categories";
 import { getCategoryColor } from "@/lib/categoryColors";
 
@@ -48,7 +49,7 @@ export default async function ArticlePage({
     : false;
 
   const relatedArticles = await prisma.article.findMany({
-    where: { categoryId: article.categoryId, id: { not: article.id } },
+    where: { id: { not: article.id } },
     take: 3,
     include: { author: true, category: true },
     orderBy: { createdAt: "desc" }
@@ -131,7 +132,7 @@ export default async function ArticlePage({
               prose-a:text-black prose-a:font-bold prose-a:underline prose-a:decoration-2 hover:prose-a:opacity-70
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-black prose-headings:font-serif
               prose-strong:text-black
-              mb-14">
+              mb-8">
               <div dangerouslySetInnerHTML={{ __html: article.content }} />
             </div>
 
@@ -147,8 +148,8 @@ export default async function ArticlePage({
               </div>
             )}
 
-            {/* Comments Area */}
-            <div className="border-t border-gray-100 dark:border-zinc-800 pt-6">
+
+            <div className="pt-2 mb-12">
               <CommentSection
                 articleId={article.id}
                 comments={article.comments as any}
@@ -157,6 +158,27 @@ export default async function ArticlePage({
                 currentUserId={session?.user?.id}
               />
             </div>
+
+            {/* Berita Terkait Section */}
+            {relatedArticles.length > 0 && (
+              <div className="border-t border-gray-200 dark:border-zinc-800 pt-16 mt-16 mb-14">
+                <div className="max-w-[720px] mx-auto">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-bold font-serif text-black tracking-tight">Temukan Lebih Banyak</h3>
+                    <Link 
+                      href={`/`}
+                      className="text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1 group"
+                    >
+                      Lihat Semua 
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+                  <ArticleGrid articles={relatedArticles as any} />
+                </div>
+              </div>
+            )}
           </article>
         </div>
 
