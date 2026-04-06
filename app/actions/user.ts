@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
@@ -36,7 +36,7 @@ export async function updateProfile(formData: FormData) {
 
      if (process.env.VERCEL || process.env.NODE_ENV === "production") {
        // Upload to Supabase Storage in production / Vercel
-       const { error: uploadError } = await supabase.storage
+       const { error: uploadError } = await supabaseAdmin.storage
          .from("uploads")
          .upload(`avatars/${filename}`, bytes, {
            contentType: imageFile.type,
@@ -45,7 +45,7 @@ export async function updateProfile(formData: FormData) {
          
        if (uploadError) {
          console.error("Supabase storage error:", uploadError);
-         return { error: "Gagal upload gambar. Pastikan bucket 'uploads' sudah dibuat di Supabase dan diset Public." };
+         return { error: "Gagal upload gambar. Hubungi administrator." };
        }
        
        const { data: publicUrlData } = supabase.storage
@@ -66,7 +66,7 @@ export async function updateProfile(formData: FormData) {
      }
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("User")
     .update({
       name: name.trim(),

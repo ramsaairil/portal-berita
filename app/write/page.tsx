@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import ArticleImageUpload from "@/components/features/articles/ArticleImageUpload";
@@ -38,7 +38,7 @@ export default async function WritePage() {
 
       if (process.env.VERCEL || process.env.NODE_ENV === "production") {
         // Upload to Supabase Storage in production / Vercel
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabaseAdmin.storage
           .from("uploads")
           .upload(`articles/${filename}`, bytes, {
             contentType: imageFile.type,
@@ -47,7 +47,7 @@ export default async function WritePage() {
           
         if (uploadError) {
           console.error("Supabase storage error:", uploadError);
-          throw new Error("Gagal upload gambar. Pastikan bucket 'uploads' sudah dibuat di Supabase dan diset Public.");
+          throw new Error("Gagal upload gambar. Hubungi administrator.");
         }
         
         const { data: publicUrlData } = supabase.storage
@@ -72,7 +72,7 @@ export default async function WritePage() {
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
 
-    const { error } = await supabase.from("Article").insert({
+    const { error } = await supabaseAdmin.from("Article").insert({
       title,
       content,
       excerpt,
