@@ -5,7 +5,10 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import ArticleImageUpload from "@/components/features/articles/ArticleImageUpload";
 
-export default async function WritePage() {
+export default async function WritePage(props: { searchParams: Promise<{ error?: string }> }) {
+  const searchParams = await props.searchParams;
+  const errorMessage = searchParams.error;
+
   const { data: categoriesRes } = await supabase.from("Category").select("*");
   const categories = categoriesRes || [];
   
@@ -20,7 +23,7 @@ export default async function WritePage() {
   async function createArticle(formData: FormData) {
     "use server";
 
-    if (!defaultUser) throw new Error("No admin user found to be the author.");
+    if (!defaultUser) redirect("/write?error=" + encodeURIComponent("Gagal: Tidak ada user Admin di database rilis."));
 
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
@@ -31,11 +34,11 @@ export default async function WritePage() {
     let featuredImg = null;
 
     if (imageFile && imageFile.size > 0 && imageFile.name !== "undefined") {
-      if (!imageFile.type.startsWith("image/")) {
-        throw new Error("File yang diunggah harus berupa gambar (JPG, PNG, dsb).");
+      if (!imageFile.type?.startsWith("image/")) {
+        redirect("/write?error=" + encodeURIComponent("File yang diunggah harus berupa gambar."));
       }
       if (imageFile.size > 5 * 1024 * 1024) {
-        throw new Error("Ukuran gambar maksimal adalah 5MB.");
+        redirect("/write?error=" + encodeURIComponent("Ukuran gambar tidak boleh lebih dari 5MB."));
       }
 
       const bytes = await imageFile.arrayBuffer();
@@ -54,7 +57,7 @@ export default async function WritePage() {
           
         if (uploadError) {
           console.error("Supabase storage error:", uploadError);
-          throw new Error("Gagal upload gambar. Hubungi administrator.");
+          redirect("/write?error=" + encodeURIComponent(`Gagal upload gambar ke Supabase: ${uploadError.message}`));
         }
         
         const { data: publicUrlData } = supabase.storage
@@ -93,7 +96,7 @@ export default async function WritePage() {
 
     if (error) {
       console.error("Create article error:", error);
-      throw new Error("Gagal menerbitkan berita.");
+      redirect("/write?error=" + encodeURIComponent(`Gagal Database: ${error.message}`));
     }
 
     revalidatePath("/");
@@ -106,6 +109,13 @@ export default async function WritePage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-black font-sans text-gray-900 dark:text-white uppercase tracking-tight">Tulis Berita Baru</h1>
         </div>
+
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium">
+            {errorMessage}
+          </div>
+        )}
+
         <form action={createArticle} className="space-y-4 bg-white dark:bg-zinc-900 p-6 border border-gray-200 dark:border-zinc-800 rounded-3xl shadow-sm">
           
           {/* Row 1: Title + Image side by side */}
