@@ -83,6 +83,7 @@ export default async function WritePage(props: { searchParams: Promise<{ error?:
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
 
     const { error } = await supabaseAdmin.from("Article").insert({
+      id: crypto.randomUUID(),
       title,
       content,
       excerpt,
