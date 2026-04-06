@@ -63,40 +63,42 @@ export default async function WritePage() {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-zinc-950 min-h-screen py-4 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4 font-sans text-gray-900 dark:text-white">Tulis Berita Baru</h1>
-        <form action={createArticle} className="space-y-5 bg-white dark:bg-zinc-900 p-5 sm:p-8 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm">
+    <div className="bg-gray-50 dark:bg-zinc-950 min-h-screen py-8 px-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-black font-sans text-gray-900 dark:text-white uppercase tracking-tight">Tulis Berita Baru</h1>
+        </div>
+        <form action={createArticle} className="space-y-4 bg-white dark:bg-zinc-900 p-6 border border-gray-200 dark:border-zinc-800 rounded-3xl shadow-sm">
           
           {/* Row 1: Title + Image side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr,300px] gap-5">
             {/* Left: Title, Category, Excerpt */}
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Judul Artikel</label>
+                <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Judul Artikel</label>
                 <input 
                   name="title" 
                   required 
-                  className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white p-3.5 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors" 
-                  placeholder="Masukkan judul berita di sini..." 
+                  className="w-full bg-gray-50/50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-gray-900 dark:text-white p-3 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all placeholder:text-gray-300" 
+                  placeholder="Masukkan judul berita..." 
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Kategori</label>
-                  <select name="categoryId" required className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white p-3.5 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer transition-colors">
+                  <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Kategori</label>
+                  <select name="categoryId" required className="w-full bg-gray-50/50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-gray-900 dark:text-white p-3 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none cursor-pointer transition-all">
                     {categories.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Ringkasan</label>
+                  <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Ringkasan</label>
                   <input 
                     name="excerpt" 
-                    className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white p-3.5 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors placeholder:text-gray-400" 
-                    placeholder="Ringkasan singkat berita..." 
+                    className="w-full bg-gray-50/50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-gray-900 dark:text-white p-3 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all placeholder:text-gray-300" 
+                    placeholder="Ringkasan singkat..." 
                   />
                 </div>
               </div>
@@ -110,18 +112,18 @@ export default async function WritePage() {
 
           {/* Row 2: Content - Full Width */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Isi Berita</label>
+            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Isi Berita</label>
             <textarea 
               name="content" 
               required 
-              className="w-full bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white p-4 rounded-xl h-[350px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors resize-y leading-relaxed placeholder:text-gray-400" 
-              placeholder="Tuliskan detail berita lengkapnya di sini..."
+              className="w-full bg-gray-50/50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-gray-900 dark:text-white p-3 rounded-2xl h-[280px] focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all resize-y leading-relaxed placeholder:text-gray-300" 
+              placeholder="Tuliskan berita lengkap..."
             ></textarea>
           </div>
 
-          <div className="pt-3 border-t border-gray-100 dark:border-zinc-800 flex justify-end">
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-sm focus:ring-4 focus:ring-blue-500/30">
-              Terbitkan Berita
+          <div className="pt-2 flex justify-end">
+            <button type="submit" className="bg-black dark:bg-white text-white dark:text-black px-10 py-3 rounded-full font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg">
+              Terbitkan
             </button>
           </div>
 

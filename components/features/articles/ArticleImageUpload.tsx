@@ -50,7 +50,7 @@ export default function ArticleImageUpload() {
           <img
             src={preview}
             alt="Preview"
-            className="w-full h-[300px] object-cover bg-gray-100 dark:bg-zinc-800"
+            className="w-full h-[200px] object-cover bg-gray-100 dark:bg-zinc-800"
           />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
              <button
@@ -81,21 +81,21 @@ export default function ArticleImageUpload() {
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          className={`flex flex-col items-center justify-center p-8 sm:p-12 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 ${
             isDragging
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-              : "border-gray-300 dark:border-zinc-700 bg-gray-50/50 dark:bg-zinc-900 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-zinc-800"
+              ? "border-black bg-gray-50 dark:border-white dark:bg-zinc-800"
+              : "border-gray-200 dark:border-zinc-800 bg-gray-50/30 dark:bg-zinc-900/50 hover:border-black dark:hover:border-white hover:bg-gray-50"
           }`}
         >
-          <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors ${
-              isDragging ? "bg-blue-100 text-blue-600" : "bg-gray-200 dark:bg-zinc-800 text-gray-500 dark:text-gray-400"
+          <div className={`mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors ${
+              isDragging ? "bg-black text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-400"
             }`}>
-             <ImagePlus className="w-6 h-6" />
+             <ImagePlus className="w-5 h-5" />
           </div>
-          <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
-            <span className="text-blue-600 dark:text-blue-400">Klik untuk unggah</span> atau seret file ke sini
+          <p className="text-[13px] font-bold text-gray-700 dark:text-gray-300">
+            <span className="text-black dark:text-white underline underline-offset-4">Klik unggah</span> atau seret
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format PNG, JPG, JPEG (Maks. 10MB)</p>
+          <p className="text-[10px] text-gray-400 mt-1 font-medium italic">PNG, JPG, JPEG (Maks. 10MB)</p>
         </div>
       )}
 

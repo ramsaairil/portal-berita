@@ -37,13 +37,15 @@ export default async function MyArticlesPage() {
             {articles.length} berita telah diterbitkan
           </p>
         </div>
-        <Link
-          href="/write"
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-gray-800 transition-all hover:shadow-lg"
-        >
-          <PenSquare className="w-4 h-4" />
-          <span className="hidden sm:inline">Tulis Berita</span>
-        </Link>
+        {articles.length > 0 && (
+          <Link
+            href="/write"
+            className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-gray-800 transition-all hover:shadow-lg"
+          >
+            <PenSquare className="w-4 h-4" />
+            <span className="hidden sm:inline">Tulis Berita</span>
+          </Link>
+        )}
       </div>
 
       {/* Stats Summary */}
@@ -124,10 +126,10 @@ export default async function MyArticlesPage() {
                       <Calendar className="w-3 h-3" />
                       {article.publishedAt
                         ? new Date(article.publishedAt).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
                         : "Draft"}
                     </div>
                   </div>
