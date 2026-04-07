@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 
@@ -18,9 +18,9 @@ export async function toggleLike(articleId: string) {
     .maybeSingle();
 
   if (existingLike) {
-    await supabase.from("Like").delete().eq("id", existingLike.id);
+    await supabaseAdmin.from("Like").delete().eq("id", existingLike.id);
   } else {
-    await supabase.from("Like").insert({ userId, articleId });
+    await supabaseAdmin.from("Like").insert({ userId, articleId });
   }
 
   revalidatePath(`/berita/[slug]`, "page");
@@ -33,7 +33,7 @@ export async function addComment(articleId: string, content: string, parentId?: 
   
   if (!content.trim()) return { error: "Komentar tidak boleh kosong." };
 
-  const { data: comment, error: createError } = await supabase
+  const { data: comment, error: createError } = await supabaseAdmin
     .from("Comment")
     .insert({
       content,
@@ -58,7 +58,7 @@ export async function addComment(articleId: string, content: string, parentId?: 
       .single();
 
     if (parentComment && parentComment.authorId !== session.user.id) {
-      await supabase.from("Notification").insert({
+      await supabaseAdmin.from("Notification").insert({
         type: "REPLY_COMMENT",
         userId: parentComment.authorId,
         actorId: session.user.id,
@@ -86,9 +86,9 @@ export async function toggleCommentLike(commentId: string) {
     .maybeSingle();
 
   if (existingLike) {
-    await supabase.from("CommentLike").delete().eq("id", existingLike.id);
+    await supabaseAdmin.from("CommentLike").delete().eq("id", existingLike.id);
   } else {
-    const { data: like, error } = await supabase
+    const { data: like, error } = await supabaseAdmin
       .from("CommentLike")
       .insert({ userId, commentId })
       .select(`
@@ -109,7 +109,7 @@ export async function toggleCommentLike(commentId: string) {
 
     // Trigger Notification for Like
     if (comment.authorId !== userId) {
-      await supabase.from("Notification").insert({
+      await supabaseAdmin.from("Notification").insert({
         type: "LIKE_COMMENT",
         userId: comment.authorId,
         actorId: userId,
@@ -137,9 +137,9 @@ export async function toggleBookmark(articleId: string) {
     .maybeSingle();
 
   if (existingBookmark) {
-    await supabase.from("Bookmark").delete().eq("id", existingBookmark.id);
+    await supabaseAdmin.from("Bookmark").delete().eq("id", existingBookmark.id);
   } else {
-    await supabase.from("Bookmark").insert({ userId, articleId });
+    await supabaseAdmin.from("Bookmark").insert({ userId, articleId });
   }
 
   revalidatePath("/bookmarks");
@@ -165,7 +165,7 @@ export async function deleteComment(commentId: string) {
     return { error: "Anda tidak memiliki izin untuk menghapus komentar ini." };
   }
 
-  await supabase.from("Comment").delete().eq("id", commentId);
+  await supabaseAdmin.from("Comment").delete().eq("id", commentId);
 
   revalidatePath(`/berita/[slug]`, "page");
   return { success: true };

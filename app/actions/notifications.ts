@@ -1,6 +1,6 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 
@@ -59,7 +59,7 @@ export async function markAsRead(id: string) {
   const session = await getSession();
   if (!session) return { error: "Not logged in" };
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("Notification")
     .update({ read: true })
     .eq("id", id)
@@ -78,7 +78,7 @@ export async function markAllAsRead() {
   const session = await getSession();
   if (!session) return { error: "Not logged in" };
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("Notification")
     .update({ read: true })
     .eq("userId", session.user.id)
