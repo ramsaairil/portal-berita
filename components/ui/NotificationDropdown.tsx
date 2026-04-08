@@ -78,47 +78,40 @@ export default function NotificationDropdown() {
 
       {isOpen && (
         <>
-          {/* Backdrop — mobile only */}
-          <div
-            className="fixed inset-0 bg-black/30 z-[99] sm:hidden"
+          {/* Invisible backdrop to capture clicks on mobile to easily close */}
+          <div 
+            className="fixed inset-0 z-[99] sm:hidden"
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Notification panel */}
           <div className="
-            fixed inset-x-0 bottom-0 top-auto z-[100] sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2
-            w-full sm:w-[380px]
-            bg-white border-t sm:border border-gray-100
-            rounded-t-2xl sm:rounded-2xl
+            absolute -right-2 sm:right-0 mt-3 sm:mt-2
+            w-[290px] sm:w-[380px]
+            bg-white border border-gray-100
+            rounded-2xl
             shadow-2xl overflow-hidden
-            animate-in fade-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200
-            sm:origin-top-right
-            max-h-[85vh] sm:max-h-none
+            animate-in fade-in zoom-in-95 duration-200
+            origin-top-right
+            z-[100]
             flex flex-col
           ">
             {/* Header */}
-            <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50 shrink-0">
-              <h3 className="font-bold text-[16px]">Notifikasi</h3>
+            <div className="p-3.5 sm:p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50 shrink-0">
+              <h3 className="font-bold text-[15px] sm:text-[16px]">Notifikasi</h3>
               <div className="flex items-center gap-3">
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="text-[12px] font-semibold text-[#0d88b5] hover:underline"
+                    className="text-[11px] sm:text-[12px] font-semibold text-[#0d88b5] hover:underline"
                   >
-                    Tandai semua dibaca
+                    Tandai dibaca
                   </button>
                 )}
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="sm:hidden text-gray-400 hover:text-black text-[13px] font-bold"
-                >
-                  Tutup
-                </button>
               </div>
             </div>
 
             {/* Notification list */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="max-h-[65vh] sm:max-h-[400px] overflow-y-auto">
               {notifications.length > 0 ? (
                 notifications.map((notif) => (
                   <Link
@@ -128,15 +121,15 @@ export default function NotificationDropdown() {
                       setIsOpen(false);
                       if (!notif.read) markAsRead(notif.id);
                     }}
-                    className={`flex gap-3 p-4 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${!notif.read ? "bg-blue-50/30" : ""}`}
+                    className={`flex gap-3 p-3 sm:p-4 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${!notif.read ? "bg-blue-50/30" : ""}`}
                   >
                     <div className="shrink-0 relative">
                       <img
                         src={notif.actor.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.actor.name}`}
-                        className="w-10 h-10 rounded-full object-cover border border-gray-100"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-100"
                         alt=""
                       />
-                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white ${notif.type === "LIKE_COMMENT" ? "bg-pink-500" : "bg-blue-500"}`}>
+                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white ${notif.type === "LIKE_COMMENT" ? "bg-pink-500" : "bg-blue-500"}`}>
                         {notif.type === "LIKE_COMMENT" ? (
                           <Heart className="w-2.5 h-2.5 text-white fill-current" />
                         ) : (
@@ -145,42 +138,42 @@ export default function NotificationDropdown() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] leading-snug">
+                      <p className="text-[12px] sm:text-[13px] leading-snug">
                         <span className="font-bold text-black">{notif.actor.name}</span>{" "}
                         {notif.type === "LIKE_COMMENT" ? (
-                          <span className="text-gray-600">menyukai komentar Anda di</span>
+                          <span className="text-gray-600">menyukai komentar ini:</span>
                         ) : (
-                          <span className="text-gray-600">membalas komentar Anda di</span>
+                          <span className="text-gray-600">membalas di menu:</span>
                         )}{" "}
                         <span className="font-semibold text-gray-900 line-clamp-1">"{notif.article?.title}"</span>
                       </p>
-                      <div className="flex items-center gap-2 mt-1.5 text-[11px] text-gray-400">
-                        <Clock className="w-3 h-3" />
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-1.5 text-[10px] sm:text-[11px] text-gray-400">
+                        <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         {timeAgo(notif.createdAt)}
                       </div>
                     </div>
                     {!notif.read && (
                       <button
                         onClick={(e) => handleMarkAsRead(notif.id, e)}
-                        className="shrink-0 w-2 h-2 bg-[#0d88b5] rounded-full mt-2"
+                        className="shrink-0 w-2 h-2 bg-[#0d88b5] rounded-full mt-1 sm:mt-2"
                         title="Tandai dibaca"
                       />
                     )}
                   </Link>
                 ))
               ) : (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Bell className="w-8 h-8 text-gray-300" />
+                <div className="p-10 sm:p-12 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <Bell className="w-6 h-6 sm:w-8 sm:h-8 text-gray-300" />
                   </div>
-                  <p className="text-gray-500 text-[14px]">Belum ada notifikasi.</p>
+                  <p className="text-gray-500 text-[13px] sm:text-[14px]">Belum ada notifikasi.</p>
                 </div>
               )}
             </div>
 
             {notifications.length > 0 && (
-              <div className="p-3 bg-gray-50/50 text-center border-t border-gray-100 shrink-0">
-                <button className="text-[12px] font-bold text-gray-500 hover:text-black">
+              <div className="p-2.5 sm:p-3 bg-gray-50/50 text-center border-t border-gray-100 shrink-0">
+                <button className="text-[11px] sm:text-[12px] font-bold text-gray-500 hover:text-black">
                   Lihat Semua Notifikasi
                 </button>
               </div>

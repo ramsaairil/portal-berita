@@ -10,6 +10,22 @@ import ArticleGrid from "@/components/features/articles/ArticleGrid";
 import { getPopularCategories } from "@/lib/categories";
 import { getCategoryColor } from "@/lib/categoryColors";
 
+/** Mengkonversi plain text jadi HTML paragraf secara otomatis */
+function formatArticleContent(content: string): string {
+  if (!content) return '';
+  // Jika teks sudah memiliki format tag HTML, biarkan.
+  if (/<[a-z][\s\S]*>/i.test(content)) return content;
+  
+  // Jika berupa teks biasa (plain text), pecah berdasarkan ENTER/baris baru 
+  // dan bungkus setiap barisnya dengan <p> agar stylenya rapih
+  return content
+    .split(/\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .map(line => `<p>${line}</p>`)
+    .join('\n');
+}
+
 export default async function ArticlePage({
   params,
 }: {
@@ -163,7 +179,7 @@ export default async function ArticlePage({
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-black prose-headings:font-serif
               prose-strong:text-black
               mb-8">
-              <div dangerouslySetInnerHTML={{ __html: article.content }} />
+              <div dangerouslySetInnerHTML={{ __html: formatArticleContent(article.content) }} />
             </div>
 
             {/* Minimal Tags */}
