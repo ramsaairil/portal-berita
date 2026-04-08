@@ -25,7 +25,7 @@ export default function CategoryBar({ categories }: { categories: Category[] }) 
   return (
     <div id="category-bar" className="w-full -mb-4 relative z-10 transition-all duration-300">
       <div className="max-w-[1336px] mx-auto px-4 sm:px-6">
-        <div className="flex items-center gap-3 overflow-x-auto pt-4 pb-0 no-scrollbar scroll-smooth">
+        <div className="flex items-center gap-3 overflow-x-auto pt-4 pb-2 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {categories.map((cat) => {
             const isActive = pathname === `/category/${cat.slug}`;
             const color = getCategoryColor(cat.name);
