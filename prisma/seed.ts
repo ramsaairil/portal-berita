@@ -212,7 +212,7 @@ async function main() {
     {
       title: 'Perkembangan Artificial Intelligence di Tahun 2026',
       slug: 'perkembangan-ai-di-tahun-2026',
-      content: 'Tahun 2026 menjadi titik balik penerapan AI di berbagai sektor industri. Dengan kemampuan analitik yang semakin tajam, AI kini mampu membantu pengambilan keputusan medis hingga kebijakan publik secara presisi.',
+      content: 'Tahun 2026 menjadi titik balik penerapan AI di berbagai sektor industri. Dengan kemampuan analitik yang semakin tajam, AI kini mampu membantu pengambilan keputusan medis hingga kebijakan publik secara presisi.\n\nSelain itu, integrasi AI dalam sistem transportasi pintar telah mengurangi angka kemacetan hingga 30% di berbagai kota besar. Hal ini membuktikan bahwa teknologi bukan hanya sekadar alat, melainkan solusi nyata bagi permasalahan urban.',
       excerpt: 'Tahun 2026 menjadi titik balik penerapan AI di berbagai sektor industri...',
       categoryId: techCategory.id,
       featuredImg: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1000',
@@ -270,7 +270,7 @@ async function main() {
     {
       title: 'Pemilu Serentak Siap Digelar Tahun Depan',
       slug: 'pemilu-serentak-siap-digelar',
-      content: 'Komisi Pemilihan Umum (KPU) telah mematangkan berbagai persiapan menjelang pesta demokrasi. Diharapkan partisipasi publik meningkat seiring kemudahan akses informasi digital.',
+      content: 'Komisi Pemilihan Umum (KPU) telah mematangkan berbagai persiapan menjelang pesta demokrasi. Diharapkan partisipasi publik meningkat seiring kemudahan akses informasi digital.\n\nKetua KPU menyatakan bahwa sistem e-voting akan diuji coba di beberapa daerah untuk meningkatkan efisiensi dan transparansi penghitungan suara.',
       excerpt: 'Komisi Pemilihan Umum (KPU) telah mematangkan persiapan demokrasi...',
       categoryId: politicsCategory.id,
       featuredImg: 'https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?q=80&w=1000',

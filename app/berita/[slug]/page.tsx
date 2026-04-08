@@ -16,13 +16,13 @@ function formatArticleContent(content: string): string {
   // Jika teks sudah memiliki format tag HTML, biarkan.
   if (/<[a-z][\s\S]*>/i.test(content)) return content;
   
-  // Jika berupa teks biasa (plain text), pecah berdasarkan ENTER/baris baru 
-  // dan bungkus setiap barisnya dengan <p> agar stylenya rapih
+  // Jika berupa teks biasa (plain text), pecah berdasarkan DOUBLE ENTER (paragraf)
+  // dan bungkus setiap paragraf dengan <p> agar stylenya rapih
   return content
-    .split(/\n/)
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .map(line => `<p>${line}</p>`)
+    .split(/\n\r?\n/)
+    .map(p => p.trim())
+    .filter(p => p.length > 0)
+    .map(p => `<p>${p.replace(/\n/g, '<br />')}</p>`)
     .join('\n');
 }
 
@@ -174,11 +174,18 @@ export default async function ArticlePage({
 
             {/* Article Body */}
             <div className="prose prose-lg sm:prose-xl max-w-none
-              prose-p:leading-[1.9] prose-p:text-[#333] prose-p:font-serif
-              prose-a:text-black prose-a:font-bold prose-a:underline prose-a:decoration-2 hover:prose-a:opacity-70
+              prose-p:leading-[1.8] prose-p:text-[#292929] prose-p:font-serif
+              prose-p:mb-8
+              prose-p:first-of-type:first-letter:text-7xl 
+              prose-p:first-of-type:first-letter:font-bold 
+              prose-p:first-of-type:first-letter:float-left 
+              prose-p:first-of-type:first-letter:mr-3 
+              prose-p:first-of-type:first-letter:mt-1
+              prose-p:first-of-type:first-letter:text-black
+              prose-a:text-black prose-a:font-bold prose-a:underline prose-a:decoration-1 hover:prose-a:opacity-70
               prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-black prose-headings:font-serif
               prose-strong:text-black
-              mb-8">
+              mb-12">
               <div dangerouslySetInnerHTML={{ __html: formatArticleContent(article.content) }} />
             </div>
 
