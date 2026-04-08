@@ -44,5 +44,5 @@ export async function getPopularCategories() {
     };
   });
 
-  return withEngagement.sort((a: any, b: any) => b.engagement - a.engagement).slice(0, 7);
+  return withEngagement.sort((a: any, b: any) => b.engagement - a.engagement);
 }
