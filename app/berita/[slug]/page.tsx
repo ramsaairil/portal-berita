@@ -9,6 +9,7 @@ import CommentSection from "@/components/features/articles/CommentSection";
 import ArticleGrid from "@/components/features/articles/ArticleGrid";
 import { getPopularCategories } from "@/lib/categories";
 import { getCategoryColor } from "@/lib/categoryColors";
+import { getArticleBySlug, getRelatedArticles } from "@/lib/articles";
 
 /** Mengkonversi plain text jadi HTML paragraf secara otomatis */
 function formatArticleContent(content: string): string {
@@ -33,37 +34,9 @@ export default async function ArticlePage({
 }) {
   const { slug } = await params;
 
-  const { data: article, error } = await supabase
-    .from("Article")
-    .select(`
-      *,
-      author:User (
-        id,
-        name,
-        image
-      ),
-      category:Category (
-        id,
-        name,
-        slug
-      ),
-      tags:Tag (*),
-      likes:Like (userId),
-      bookmarks:Bookmark (userId),
-      comments:Comment (
-        *,
-        author:User (
-          id,
-          name,
-          image
-        ),
-        commentLikes:CommentLike (*)
-      )
-    `)
-    .eq("slug", slug)
-    .maybeSingle();
+  const article = await getArticleBySlug(slug);
 
-  if (error || !article) notFound();
+  if (!article) notFound();
 
   const session = await getSession();
   const isLoggedIn = !!session;
@@ -76,25 +49,7 @@ export default async function ArticlePage({
     ? article.bookmarks.some((b: { userId: string }) => b.userId === session.user.id)
     : false;
 
-  const { data: relatedArticles } = await supabase
-    .from("Article")
-    .select(`
-      *,
-      author:User (
-        id,
-        name,
-        image
-      ),
-      category:Category (
-        id,
-        name,
-        slug
-      )
-    `)
-    .neq("id", article.id)
-    .eq("status", "PUBLISHED")
-    .order("createdAt", { ascending: false })
-    .limit(3);
+  const relatedArticles = await getRelatedArticles(article.id);
 
   const categories = await getPopularCategories();
   const categoryColor = getCategoryColor(article.category.name);

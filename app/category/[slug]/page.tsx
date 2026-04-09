@@ -1,9 +1,9 @@
-import { supabase } from "@/lib/supabase";
 import ArticleList from "@/components/features/articles/ArticleList";
 import Sidebar from "@/components/layout/Sidebar";
 import { notFound } from "next/navigation";
 import { getPopularCategories } from "@/lib/categories";
 import { getCategoryColor } from "@/lib/categoryColors";
+import { getCategoryBySlug, getArticlesByCategory } from "@/lib/articles";
 
 export default async function CategoryPage({
   params,
@@ -12,32 +12,11 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
 
-  const { data: category, error: categoryError } = await supabase
-    .from("Category")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const category = await getCategoryBySlug(slug);
 
-  if (categoryError || !category) notFound();
+  if (!category) notFound();
 
-  const { data: articles, error: articlesError } = await supabase
-    .from("Article")
-    .select(`
-      *,
-      author:User (
-        id,
-        name,
-        image
-      ),
-      category:Category (
-        id,
-        name,
-        slug
-      )
-    `)
-    .eq("categoryId", category.id)
-    .eq("status", "PUBLISHED")
-    .order("createdAt", { ascending: false });
+  const articles = await getArticlesByCategory(category.id);
 
   const categories = await getPopularCategories();
   const categoryColor = getCategoryColor(category.name);

@@ -1,6 +1,6 @@
 import Sidebar from "@/components/layout/Sidebar";
 import Pagination from "@/components/ui/Pagination";
-import { supabase } from "@/lib/supabase";
+import { getArticlesForHome } from "@/lib/articles";
 import { getPopularCategories } from "@/lib/categories";
 import HeroSlider from "@/components/features/articles/HeroSlider";
 import ArticleGrid from "@/components/features/articles/ArticleGrid";
@@ -15,33 +15,8 @@ export default async function Home(props: {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const [articlesRes, countRes] = await Promise.all([
-    supabase
-      .from("Article")
-      .select(`
-        *,
-        author:User (
-          id,
-          name,
-          image
-        ),
-        category:Category (
-          id,
-          name,
-          slug
-        )
-      `)
-      .eq("status", "PUBLISHED")
-      .order("createdAt", { ascending: false })
-      .range(from, to),
-    supabase
-      .from("Article")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "PUBLISHED")
-  ]);
+  const { articles, totalArticles } = await getArticlesForHome(from, to);
 
-  const articles = articlesRes.data || [];
-  const totalArticles = countRes.count || 0;
 
   const totalPages = Math.ceil(totalArticles / limit);
   const categories = await getPopularCategories();
