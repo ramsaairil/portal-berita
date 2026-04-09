@@ -1,4 +1,5 @@
 import Parser from 'rss-parser';
+import { unstable_cache } from 'next/cache';
 
 export const revalidate = 3600;
 
@@ -29,16 +30,22 @@ function getImageUrl(item: CustomItem): string | null {
   );
 }
 
-export default async function TrendingWidget() {
-  let items: CustomItem[] = [];
+const getTrendingItems = unstable_cache(
+  async () => {
+    try {
+      const feed = await customParser.parseURL('https://www.antaranews.com/rss/terkini.xml');
+      return (feed.items as CustomItem[]).slice(0, 5);
+    } catch (error) {
+      console.error("Error fetching RSS feed:", error);
+      return [];
+    }
+  },
+  ['trending-rss'],
+  { revalidate: 3600 }
+);
 
-  try {
-    const feed = await customParser.parseURL('https://www.antaranews.com/rss/terkini.xml');
-    items = (feed.items as CustomItem[]).slice(0, 5);
-  } catch (error) {
-    console.error("Error fetching RSS feed:", error);
-    return null;
-  }
+export default async function TrendingWidget() {
+  const items = await getTrendingItems();
 
   if (!items || items.length === 0) return null;
 
