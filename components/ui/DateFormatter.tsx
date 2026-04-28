@@ -19,7 +19,16 @@ export default function DateFormatter({ date, format = "full", className }: Date
     return <span className={className}>...</span>;
   }
 
-  const dateObj = typeof date === "string" ? new Date(date) : date;
+  let dateObj: Date;
+  if (typeof date === "string") {
+    // If it looks like a database timestamp without 'Z' or offset, append 'Z' to treat as UTC
+    const normalizedDate = (date.includes("Z") || date.includes("+")) 
+      ? date 
+      : `${date.replace(" ", "T")}Z`;
+    dateObj = new Date(normalizedDate);
+  } else {
+    dateObj = date;
+  }
   
   // Format based on Indonesian locale and WIB timezone
   const options: Intl.DateTimeFormatOptions = {

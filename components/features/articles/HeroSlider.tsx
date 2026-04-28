@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getCategoryColor } from "@/lib/categoryColors";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import DateFormatter from "@/components/ui/DateFormatter";
 
 export default function HeroSlider({ articles }: { articles: any[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,13 +94,11 @@ export default function HeroSlider({ articles }: { articles: any[] }) {
                     <span className="text-white drop-shadow">{article.author.name}</span>
                     <span>·</span>
                     <span className="drop-shadow">
-                      {article.publishedAt
-                        ? new Date(article.publishedAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })
-                        : "Draft"}
+                      {article.publishedAt ? (
+                        <DateFormatter date={article.publishedAt} format="date" />
+                      ) : (
+                        "Draft"
+                      )}
                     </span>
                   </div>
                 </div>

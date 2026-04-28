@@ -54,7 +54,15 @@ export default function NotificationDropdown() {
   };
 
   const timeAgo = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
+    let d: Date;
+    if (typeof date === "string") {
+      const normalizedDate = (date.includes("Z") || date.includes("+")) 
+        ? date 
+        : `${date.replace(" ", "T")}Z`;
+      d = new Date(normalizedDate);
+    } else {
+      d = date;
+    }
     const now = new Date();
     const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
     

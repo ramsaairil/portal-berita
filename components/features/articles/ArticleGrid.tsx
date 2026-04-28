@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCategoryColor } from "@/lib/categoryColors";
+import DateFormatter from "@/components/ui/DateFormatter";
 
 interface ArticleWithRelations {
   id: string;
@@ -67,13 +68,11 @@ function ArticleCard({ article }: { article: ArticleWithRelations }) {
           <span className="font-bold text-gray-600">{article.author.name}</span>
           <span>·</span>
           <span>
-            {article.publishedAt
-              ? new Date(article.publishedAt).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })
-              : "Draft"}
+            {article.publishedAt ? (
+              <DateFormatter date={article.publishedAt} format="date" />
+            ) : (
+              "Draft"
+            )}
           </span>
         </div>
       </Link>

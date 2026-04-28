@@ -10,6 +10,7 @@ import ArticleGrid from "@/components/features/articles/ArticleGrid";
 import { getPopularCategories } from "@/lib/categories";
 import { getCategoryColor } from "@/lib/categoryColors";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/articles";
+import DateFormatter from "@/components/ui/DateFormatter";
 
 /** Mengkonversi plain text jadi HTML paragraf secara otomatis */
 function formatArticleContent(content: string): string {
@@ -92,9 +93,11 @@ export default async function ArticlePage({
                 <div className="text-left">
                   <div className="font-bold text-[15px] text-gray-900">{article.author.name}</div>
                   <div className="text-[13px] text-gray-400 mt-0.5">
-                    {article.publishedAt
-                      ? new Date(article.publishedAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
-                      : "Baru saja"}
+                    {article.publishedAt ? (
+                      <DateFormatter date={article.publishedAt} format="date" />
+                    ) : (
+                      "Baru saja"
+                    )}
                   </div>
                 </div>
               </div>
