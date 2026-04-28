@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThumbsUp, Trash2, CornerDownRight } from "lucide-react";
 import Image from "next/image";
+import DateFormatter from "@/components/ui/DateFormatter";
 
 type CommentType = {
   id: string;
@@ -201,11 +202,10 @@ export default function CommentSection({
                </span>
              )}
 
-             <span className="text-gray-400 text-[13px]">
-               {new Date(c.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short" })} 
-               {" · "} 
-               {new Date(c.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-             </span>
+             <DateFormatter 
+               date={c.createdAt} 
+               className="text-gray-400 text-[13px]" 
+             />
            </div>
            <p className="text-[#242424] leading-relaxed text-[15px] mb-2 whitespace-pre-wrap">{c.content}</p>
            

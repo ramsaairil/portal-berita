@@ -9,6 +9,7 @@ export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchStatus = async () => {
@@ -21,6 +22,7 @@ export default function NotificationDropdown() {
   };
 
   useEffect(() => {
+    setMounted(true);
     fetchStatus();
     // Poll for notifications every 30 seconds
     const interval = setInterval(fetchStatus, 30000);
@@ -51,14 +53,26 @@ export default function NotificationDropdown() {
     fetchStatus();
   };
 
-  const timeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+  const timeAgo = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+    
+    // Handle clock drift or very recent items
     if (seconds < 60) return "Baru saja";
+    
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m yang lalu`;
+    
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}j yang lalu`;
-    return new Date(date).toLocaleDateString("id-ID");
+    
+    // Fallback to local date string with WIB
+    return d.toLocaleDateString("id-ID", { 
+      day: "numeric", 
+      month: "short",
+      timeZone: "Asia/Jakarta"
+    });
   };
 
   return (
@@ -149,7 +163,7 @@ export default function NotificationDropdown() {
                       </p>
                       <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-1.5 text-[10px] sm:text-[11px] text-gray-400">
                         <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        {timeAgo(notif.createdAt)}
+                        {mounted ? timeAgo(notif.createdAt) : "..."}
                       </div>
                     </div>
                     {!notif.read && (
